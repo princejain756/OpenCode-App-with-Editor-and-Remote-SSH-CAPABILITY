@@ -10,6 +10,30 @@ declare module "sst" {
       "type": "sst.sst.Secret"
       "value": string
     }
+    "AUTH_API_URL": {
+      "type": "sst.sst.Linkable"
+      "value": string
+    }
+    "Console": {
+      "type": "sst.cloudflare.StaticSite"
+      "url": string
+    }
+    "DATABASE_PASSWORD": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
+    "DATABASE_USERNAME": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
+    "Database": {
+      "database": string
+      "host": string
+      "password": string
+      "port": number
+      "type": "sst.sst.Linkable"
+      "username": string
+    }
     "GITHUB_APP_ID": {
       "type": "sst.sst.Secret"
       "value": string
@@ -18,12 +42,24 @@ declare module "sst" {
       "type": "sst.sst.Secret"
       "value": string
     }
+    "GITHUB_CLIENT_ID_CONSOLE": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
+    "GITHUB_CLIENT_SECRET_CONSOLE": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
     "OPENAI_API_KEY": {
       "type": "sst.sst.Secret"
       "value": string
     }
-    "OPENCODE_API_KEY": {
+    "STRIPE_SECRET_KEY": {
       "type": "sst.sst.Secret"
+      "value": string
+    }
+    "STRIPE_WEBHOOK_SECRET": {
+      "type": "sst.sst.Linkable"
       "value": string
     }
     "Web": {
@@ -41,6 +77,8 @@ import * as cloudflare from "@cloudflare/workers-types";
 declare module "sst" {
   export interface Resource {
     "Api": cloudflare.Service
+    "AuthApi": cloudflare.Service
+    "AuthStorage": cloudflare.KVNamespace
     "Bucket": cloudflare.R2Bucket
     "GatewayApi": cloudflare.Service
   }
