@@ -75,10 +75,10 @@ export function SessionRevertDock(props: {
       </Show>
 
       <Show when={!store.collapsed}>
-        <div class="px-3 pb-11 flex flex-col gap-1.5 max-h-42 overflow-y-auto no-scrollbar">
+        <div class="px-3 pb-7 flex flex-col gap-1.5 max-h-42 overflow-y-auto no-scrollbar">
           <For each={props.items}>
             {(item) => (
-              <div class="flex items-center gap-2 min-w-0 rounded-[10px] border border-border-weak-base bg-background-stronger px-2.5 py-2">
+              <div class="flex items-center gap-2 min-w-0 py-1">
                 <span class="min-w-0 flex-1 truncate text-13-regular text-text-strong">{item.text}</span>
                 <Button
                   size="small"
