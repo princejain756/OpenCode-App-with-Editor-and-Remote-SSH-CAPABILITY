@@ -131,6 +131,41 @@ export const SshApi = HttpApi.make("ssh")
             description: "Terminate the active persistent SSH tunnel.",
           }),
         ),
+        HttpApiEndpoint.post("bootstrap", "/ssh/bootstrap", {
+          payload: Schema.Struct({
+            hostId: Schema.String,
+            workspaceDir: Schema.optional(Schema.String),
+          }),
+          query: WorkspaceRoutingQuery,
+          success: described(Schema.Boolean, "Bootstrap status"),
+        }).annotateMerge(
+          OpenApi.annotations({
+            identifier: "ssh.bootstrap",
+            summary: "Bootstrap remote OpenCode server",
+            description: "Install and start remote OpenCode agent backend on the Ubuntu host.",
+          }),
+        ),
+        HttpApiEndpoint.post("exec", "/ssh/exec", {
+          payload: Schema.Struct({
+            hostId: Schema.String,
+            command: Schema.String,
+          }),
+          query: WorkspaceRoutingQuery,
+          success: described(
+            Schema.Struct({
+              stdout: Schema.String,
+              stderr: Schema.String,
+              exitCode: Schema.Number,
+            }),
+            "Command result",
+          ),
+        }).annotateMerge(
+          OpenApi.annotations({
+            identifier: "ssh.exec",
+            summary: "Execute remote command",
+            description: "Run a shell command on the remote SSH target.",
+          }),
+        ),
         HttpApiEndpoint.get("status", SshPaths.status, {
           query: WorkspaceRoutingQuery,
           success: described(SSHStatusSchema, "SSH status"),

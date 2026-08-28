@@ -253,6 +253,96 @@ export class SSHManager {
     })
   }
 
+  public async execRemoteCommand(
+    hostId: string,
+    command: string,
+  ): Promise<{ stdout: string; stderr: string; exitCode: number }> {
+    const all = this.getAllHosts()
+    const target = all.find((h) => h.id === hostId || h.host === hostId)
+    if (!target) {
+      throw new Error(`SSH Host not found: ${hostId}`)
+    }
+
+    const hostName = target.hostName || target.host
+    const user = target.user || os.userInfo().username
+    const port = target.port || 22
+
+    const conn = this.activeConnections.get(target.id)
+    const sshArgs: string[] = []
+
+    if (conn?.controlSocket && fs.existsSync(conn.controlSocket)) {
+      sshArgs.push("-S", conn.controlSocket)
+    } else {
+      sshArgs.push("-p", String(port))
+      if (target.identityFile && target.identityFile.length > 0) {
+        for (const keyFile of target.identityFile) {
+          sshArgs.push("-i", keyFile)
+        }
+      }
+      if (target.proxyJump) {
+        sshArgs.push("-J", target.proxyJump)
+      }
+    }
+
+    sshArgs.push(`${user}@${hostName}`, command)
+
+    return new Promise((resolve, reject) => {
+      try {
+        const proc = spawn("ssh", sshArgs, { stdio: ["ignore", "pipe", "pipe"] })
+        let stdout = ""
+        let stderr = ""
+
+        proc.stdout?.on("data", (d) => {
+          stdout += d.toString()
+        })
+        proc.stderr?.on("data", (d) => {
+          stderr += d.toString()
+        })
+
+        proc.on("error", reject)
+        proc.on("close", (exitCode) => {
+          resolve({ stdout, stderr, exitCode: exitCode ?? 0 })
+        })
+      } catch (err) {
+        reject(err)
+      }
+    })
+  }
+
+  public async bootstrapRemoteServer(hostId: string, workspaceDir = "~"): Promise<boolean> {
+    try {
+      // Check if opencode server is already running on remote port 4096
+      const checkRes = await this.execRemoteCommand(
+        hostId,
+        "ss -tulpn 2>/dev/null | grep ':4096 ' || lsof -i :4096 || true",
+      )
+
+      if (checkRes.stdout.includes("4096")) {
+        return true // Already listening
+      }
+
+      // Check if opencode is installed on remote host
+      const whichRes = await this.execRemoteCommand(
+        hostId,
+        "which opencode || test -f ~/.opencode/bin/opencode && echo ~/.opencode/bin/opencode || echo not_found",
+      )
+
+      const hasOpencode = !whichRes.stdout.includes("not_found")
+      const binary = hasOpencode ? whichRes.stdout.trim() : "npx -y opencode@latest"
+
+      // Launch remote server in background
+      await this.execRemoteCommand(
+        hostId,
+        `nohup ${binary} serve --port 4096 --hostname 127.0.0.1 > /tmp/opencode-server.log 2>&1 &`,
+      )
+
+      return true
+    } catch (err) {
+      console.warn("[ssh] Remote bootstrap warning:", err)
+      return false
+    }
+  }
+
   public async disconnect(hostId: string): Promise<boolean> {
     const conn = this.activeConnections.get(hostId)
     if (!conn) return false
