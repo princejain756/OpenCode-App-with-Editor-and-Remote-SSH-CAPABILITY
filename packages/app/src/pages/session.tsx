@@ -31,6 +31,7 @@ import { LspProvider } from "@/context/lsp"
 import { AgentReviewProvider } from "@/context/agent-review"
 import { TimelineSyncProvider } from "@/context/timeline-sync"
 import { SSHProvider } from "@/context/ssh"
+import { GitProvider } from "@/context/git"
 import { createStore } from "solid-js/store"
 import type { SessionReviewLineComment } from "@opencode-ai/session-ui/session-review"
 import { ResizeHandle } from "@opencode-ai/ui/resize-handle"
@@ -330,9 +331,11 @@ function SessionProviders(props: ParentProps) {
               <AgentReviewProvider>
                 <TimelineSyncProvider>
                   <SSHProvider>
-                    <PromptProvider>
-                      <CommentsProvider>{props.children}</CommentsProvider>
-                    </PromptProvider>
+                    <GitProvider>
+                      <PromptProvider>
+                        <CommentsProvider>{props.children}</CommentsProvider>
+                      </PromptProvider>
+                    </GitProvider>
                   </SSHProvider>
                 </TimelineSyncProvider>
               </AgentReviewProvider>
