@@ -1,16 +1,16 @@
 # Build Status
 
 ## Overall
-- Current phase: Phase 02 — Buffers, Tabs, Search, Watchers
+- Current phase: Phase 03 — LSP / IntelliSense
 - Last successful build: Desktop Build OK (`electron-vite build` 41.88s)
-- Last successful test run: `packages/app` (727 pass), `packages/opencode` (3394 pass)
+- Last successful test run: `packages/app` (731 pass), `packages/opencode` (3394 pass)
 - Current branch: dev
-- Latest phase commit: Phase 01 completed
+- Latest phase commit: Phase 02 completed
 
 ## Phase Status
 - [x] Phase 00 — Repository Audit
 - [x] Phase 01 — Editable Local Editor
-- [ ] Phase 02 — Buffers, Tabs, Search, Watchers
+- [x] Phase 02 — Buffers, Tabs, Search, Watchers
 - [ ] Phase 03 — LSP / IntelliSense
 - [ ] Phase 04 — Agent + Editor Diff Integration
 - [ ] Phase 05 — Rewind / Restore / Fork UX
@@ -22,7 +22,7 @@
 - [ ] Phase 11 — Packaging, Hardening, Acceptance
 
 ## Current work
-Starting Phase 02: Enhancing multi-tab lifecycle, split editor panes, global full-text search (ripgrep) with find-and-replace, and resilient workspace file watchers.
+Starting Phase 03: Wiring Language Server Protocol (LSP) diagnostics, completions, hover tooltips, go-to-definition, and signature help directly into Monaco Editor.
 
 ## Known issues
 None blocking progress.

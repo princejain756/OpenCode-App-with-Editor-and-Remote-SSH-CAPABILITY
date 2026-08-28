@@ -6,6 +6,7 @@ import { Breadcrumbs } from "./breadcrumbs"
 import { ConflictBanner } from "./conflict-banner"
 import { EditorStatusBar } from "./editor-status-bar"
 import { EditorSettingsDialog } from "./editor-settings-dialog"
+import { DiffViewerDialog } from "./diff-viewer-dialog"
 
 export interface MonacoEditorProps {
   path: string
@@ -20,6 +21,7 @@ export function MonacoEditor(props: MonacoEditorProps) {
   const buffer = useBuffer()
   const theme = useTheme()
   const [showSettings, setShowSettings] = createSignal(false)
+  const [showDiff, setShowDiff] = createSignal(false)
 
   const activeBuf = () => buffer.getBuffer(props.path)
 
@@ -140,6 +142,7 @@ export function MonacoEditor(props: MonacoEditorProps) {
         <ConflictBanner
           onKeep={() => buffer.resolveConflict(props.path, "keep")}
           onReload={() => buffer.resolveConflict(props.path, "reload")}
+          onCompare={() => setShowDiff(true)}
         />
       </Show>
 
@@ -156,6 +159,18 @@ export function MonacoEditor(props: MonacoEditorProps) {
         open={showSettings()}
         onOpenChange={setShowSettings}
       />
+
+      <Show when={activeBuf()?.hasConflict}>
+        <DiffViewerDialog
+          open={showDiff()}
+          path={props.path}
+          diskContent={activeBuf()?.conflictContent ?? activeBuf()?.diskContent ?? ""}
+          bufferContent={activeBuf()?.content ?? ""}
+          onKeep={() => buffer.resolveConflict(props.path, "keep")}
+          onReload={() => buffer.resolveConflict(props.path, "reload")}
+          onClose={() => setShowDiff(false)}
+        />
+      </Show>
     </div>
   )
 }
