@@ -24,6 +24,7 @@ import { getSessionHandoff } from "@/pages/session/handoff"
 import { useSessionLayout } from "@/pages/session/session-layout"
 import { createSessionTabs } from "@/pages/session/helpers"
 import { MonacoEditor, SplitEditorContainer } from "@/components/editor"
+import { RemoteConnectionBanner } from "@/components/remote"
 
 type SessionFileViewProps = {
   tab: string
@@ -495,21 +496,24 @@ function SessionFileViewV1(props: { tab: string }) {
   const isBinary = createMemo(() => state()?.content?.type === "binary")
 
   const content = () => (
-    <div class="relative h-full min-h-0">
-      <Switch>
-        <Match when={path() && !isBinary()}>
-          <SplitEditorContainer primaryPath={path()!} />
-        </Match>
-        <Match when={state()?.loaded}>
-          <ScrollView class="h-full" viewportRef={scrollSync.setViewport} onScroll={scrollSync.handleScroll as any}>
-            {renderFile(contents())}
-          </ScrollView>
-        </Match>
-        <Match when={state()?.loading}>
-          <div class="px-6 py-4 text-text-weak">{language.t("common.loading")}...</div>
-        </Match>
-        <Match when={state()?.error}>{(err) => <div class="px-6 py-4 text-text-weak">{err()}</div>}</Match>
-      </Switch>
+    <div class="relative h-full min-h-0 flex flex-col">
+      <RemoteConnectionBanner />
+      <div class="relative flex-1 min-h-0">
+        <Switch>
+          <Match when={path() && !isBinary()}>
+            <SplitEditorContainer primaryPath={path()!} />
+          </Match>
+          <Match when={state()?.loaded}>
+            <ScrollView class="h-full" viewportRef={scrollSync.setViewport} onScroll={scrollSync.handleScroll as any}>
+              {renderFile(contents())}
+            </ScrollView>
+          </Match>
+          <Match when={state()?.loading}>
+            <div class="px-6 py-4 text-text-weak">{language.t("common.loading")}...</div>
+          </Match>
+          <Match when={state()?.error}>{(err) => <div class="px-6 py-4 text-text-weak">{err()}</div>}</Match>
+        </Switch>
+      </div>
     </div>
   )
 
@@ -793,21 +797,24 @@ function SessionFileViewV2(props: { tab: string }) {
   const isBinary = createMemo(() => state()?.content?.type === "binary")
 
   const content = () => (
-    <div class="relative h-full min-h-0">
-      <Switch>
-        <Match when={path() && !isBinary()}>
-          <SplitEditorContainer primaryPath={path()!} />
-        </Match>
-        <Match when={state()?.loaded}>
-          <ScrollView class="h-full" viewportRef={scrollSync.setViewport} onScroll={scrollSync.handleScroll as any}>
-            {renderFile(contents())}
-          </ScrollView>
-        </Match>
-        <Match when={state()?.loading}>
-          <div class="px-6 py-4 text-text-weak">{language.t("common.loading")}...</div>
-        </Match>
-        <Match when={state()?.error}>{(err) => <div class="px-6 py-4 text-text-weak">{err()}</div>}</Match>
-      </Switch>
+    <div class="relative h-full min-h-0 flex flex-col">
+      <RemoteConnectionBanner />
+      <div class="relative flex-1 min-h-0">
+        <Switch>
+          <Match when={path() && !isBinary()}>
+            <SplitEditorContainer primaryPath={path()!} />
+          </Match>
+          <Match when={state()?.loaded}>
+            <ScrollView class="h-full" viewportRef={scrollSync.setViewport} onScroll={scrollSync.handleScroll as any}>
+              {renderFile(contents())}
+            </ScrollView>
+          </Match>
+          <Match when={state()?.loading}>
+            <div class="px-6 py-4 text-text-weak">{language.t("common.loading")}...</div>
+          </Match>
+          <Match when={state()?.error}>{(err) => <div class="px-6 py-4 text-text-weak">{err()}</div>}</Match>
+        </Switch>
+      </div>
     </div>
   )
 

@@ -303,6 +303,22 @@ export const { use: useServer, provider: ServerProvider } = createSimpleContext(
       })
     }
 
+    function addSsh(input: ServerConnection.Ssh) {
+      return batch(() => {
+        const key = ServerConnection.key(input)
+        const existing = store.list.findIndex(
+          (x) => typeof x !== "string" && "host" in x && (x as any).host === input.host,
+        )
+        if (existing !== -1) {
+          setStore("list", existing, input as any)
+        } else {
+          setStore("list", store.list.length, input as any)
+        }
+        setState("active", key)
+        return input
+      })
+    }
+
     function remove(key: ServerConnection.Key) {
       const next = nextServerAfterRemoval(allServers(), key, props.defaultServer)
       const list = store.list.filter((x) => url(x) !== key)
@@ -349,6 +365,7 @@ export const { use: useServer, provider: ServerProvider } = createSimpleContext(
       },
       setActive,
       add,
+      addSsh,
       remove,
       scope,
       projects: {
