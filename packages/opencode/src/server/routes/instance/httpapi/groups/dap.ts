@@ -166,7 +166,10 @@ export const DapApi = HttpApi.make("dap")
           }),
         ),
         HttpApiEndpoint.get("stackTrace", "/dap/stackTrace", {
-          query: WorkspaceRoutingQuery,
+          query: Schema.Struct({
+            ...WorkspaceRoutingQuery.fields,
+            sessionId: Schema.String,
+          }),
           success: described(Schema.Array(DAPStackFrameSchema), "Stack trace"),
         }).annotateMerge(
           OpenApi.annotations({
@@ -176,7 +179,11 @@ export const DapApi = HttpApi.make("dap")
           }),
         ),
         HttpApiEndpoint.get("variables", "/dap/variables", {
-          query: WorkspaceRoutingQuery,
+          query: Schema.Struct({
+            ...WorkspaceRoutingQuery.fields,
+            sessionId: Schema.String,
+            variablesReference: Schema.optional(Schema.String),
+          }),
           success: described(Schema.Array(DAPVariableSchema), "Variables"),
         }).annotateMerge(
           OpenApi.annotations({
