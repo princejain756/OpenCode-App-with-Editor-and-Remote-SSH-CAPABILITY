@@ -87,10 +87,12 @@ import { controlHandlers } from "./handlers/control"
 import { controlPlaneHandlers } from "./handlers/control-plane"
 import { experimentalHandlers } from "./handlers/experimental"
 import { fileHandlers } from "./handlers/file"
+import { gitHandlers } from "./handlers/git"
 import { globalHandlers } from "./handlers/global"
 import { instanceHandlers } from "./handlers/instance"
 import { lspHandlers } from "./handlers/lsp"
 import { mcpHandlers } from "./handlers/mcp"
+import { GitServiceLive } from "@/git/manager"
 import { permissionHandlers } from "./handlers/permission"
 import { projectHandlers } from "./handlers/project"
 import { projectCopyHandlers } from "./handlers/project-copy"
@@ -159,6 +161,7 @@ const instanceApiRoutes = HttpApiBuilder.layer(InstanceHttpApi).pipe(
     configHandlers,
     experimentalHandlers,
     fileHandlers,
+    gitHandlers,
     instanceHandlers,
     lspHandlers,
     mcpHandlers,
@@ -177,7 +180,14 @@ const instanceApiRoutes = HttpApiBuilder.layer(InstanceHttpApi).pipe(
 )
 
 const instanceRoutes = instanceApiRoutes.pipe(
-  Layer.provide([httpApiAuthLayer, workspaceRoutingLive, instanceContextLayer, schemaErrorLayer, SSHServiceLive]),
+  Layer.provide([
+    httpApiAuthLayer,
+    workspaceRoutingLive,
+    instanceContextLayer,
+    schemaErrorLayer,
+    SSHServiceLive,
+    GitServiceLive,
+  ]),
 )
 const serverRoutes = HttpApiBuilder.layer(Api).pipe(
   Layer.provide(handlers),
