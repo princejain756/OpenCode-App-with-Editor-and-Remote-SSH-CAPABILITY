@@ -1,12 +1,14 @@
 import { createEffect, createSignal, onCleanup, onMount, Show } from "solid-js"
 import * as monaco from "monaco-editor"
 import { useBuffer } from "@/context/buffer"
+import { useLsp } from "@/context/lsp"
 import { useTheme } from "@opencode-ai/ui/theme/context"
 import { Breadcrumbs } from "./breadcrumbs"
 import { ConflictBanner } from "./conflict-banner"
 import { EditorStatusBar } from "./editor-status-bar"
 import { EditorSettingsDialog } from "./editor-settings-dialog"
 import { DiffViewerDialog } from "./diff-viewer-dialog"
+import { registerMonacoLspProviders, syncModelDiagnostics, ProblemsPanel } from "@/components/lsp"
 
 export interface MonacoEditorProps {
   path: string
@@ -19,9 +21,11 @@ export function MonacoEditor(props: MonacoEditorProps) {
   let currentModel: monaco.editor.ITextModel | undefined
 
   const buffer = useBuffer()
+  const lsp = useLsp()
   const theme = useTheme()
   const [showSettings, setShowSettings] = createSignal(false)
   const [showDiff, setShowDiff] = createSignal(false)
+  const [showProblems, setShowProblems] = createSignal(false)
 
   const activeBuf = () => buffer.getBuffer(props.path)
 
@@ -87,6 +91,10 @@ export function MonacoEditor(props: MonacoEditorProps) {
       buffer.updateScroll(props.path, e.scrollTop, e.scrollLeft)
     })
 
+    // Initialize LSP providers
+    registerMonacoLspProviders(lsp)
+    syncModelDiagnostics(props.path, currentModel, lsp)
+
     onCleanup(() => {
       contentDisposable.dispose()
       cursorDisposable.dispose()
@@ -94,6 +102,13 @@ export function MonacoEditor(props: MonacoEditorProps) {
       editorInstance?.dispose()
       editorInstance = undefined
     })
+  })
+
+  // Synchronize LSP diagnostics markers
+  createEffect(() => {
+    if (currentModel) {
+      syncModelDiagnostics(props.path, currentModel, lsp)
+    }
   })
 
   // Synchronize buffer content changes from outside (e.g. file reload or external update)
@@ -150,9 +165,16 @@ export function MonacoEditor(props: MonacoEditorProps) {
         <div ref={containerRef} class="absolute inset-0" />
       </div>
 
+      <Show when={showProblems()}>
+        <div class="h-44 shrink-0">
+          <ProblemsPanel onClose={() => setShowProblems(false)} />
+        </div>
+      </Show>
+
       <EditorStatusBar
         buffer={activeBuf()}
         onOpenSettings={() => setShowSettings(true)}
+        onToggleProblems={() => setShowProblems(!showProblems())}
       />
 
       <EditorSettingsDialog

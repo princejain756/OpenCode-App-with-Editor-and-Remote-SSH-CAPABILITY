@@ -1,14 +1,17 @@
 import { Show } from "solid-js"
 import { Icon } from "@opencode-ai/ui/icon"
 import { useBuffer, type EditorBuffer } from "@/context/buffer"
+import { useLsp } from "@/context/lsp"
 
 export interface EditorStatusBarProps {
   buffer?: EditorBuffer
   onOpenSettings?: () => void
+  onToggleProblems?: () => void
 }
 
 export function EditorStatusBar(props: EditorStatusBarProps) {
   const buffer = useBuffer()
+  const lsp = useLsp()
 
   return (
     <div class="flex items-center justify-between px-3 py-1 bg-surface-base border-t border-border-base text-[11px] text-text-muted select-none">
@@ -42,6 +45,22 @@ export function EditorStatusBar(props: EditorStatusBarProps) {
             </>
           )}
         </Show>
+
+        <button
+          type="button"
+          onClick={props.onToggleProblems}
+          class="flex items-center gap-2 hover:text-text-base transition-colors"
+          title="Toggle Problems Panel"
+        >
+          <span class="flex items-center gap-1">
+            <span class="size-1.5 rounded-full bg-red-500" />
+            <span>{lsp.totalErrors()}</span>
+          </span>
+          <span class="flex items-center gap-1">
+            <span class="size-1.5 rounded-full bg-amber-500" />
+            <span>{lsp.totalWarnings()}</span>
+          </span>
+        </button>
       </div>
 
       <div class="flex items-center gap-3">
