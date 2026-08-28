@@ -151,16 +151,14 @@ export const dapHandlers = HttpApiBuilder.group(InstanceHttpApi, "dap", (handler
     })
 
     const stackTrace = Effect.fn("DapHttpApi.stackTrace")(function* (ctx: {
-      query?: { sessionId?: string }
+      query: { sessionId: string; directory?: string; workspace?: string }
     }) {
-      if (!ctx.query?.sessionId) return []
       return dap.getStackTrace(ctx.query.sessionId)
     })
 
     const variables = Effect.fn("DapHttpApi.variables")(function* (ctx: {
-      query?: { sessionId?: string; variablesReference?: string }
+      query: { sessionId: string; variablesReference?: string; directory?: string; workspace?: string }
     }) {
-      if (!ctx.query?.sessionId) return []
       const ref = parseInt(ctx.query.variablesReference || "1", 10) || 1
       return dap.getVariables(ctx.query.sessionId, ref)
     })
