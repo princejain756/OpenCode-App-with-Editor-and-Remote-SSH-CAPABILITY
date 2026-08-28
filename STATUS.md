@@ -1,11 +1,11 @@
 # Build Status
 
 ## Overall
-- Current phase: Phase 10 — Debugging / DAP
+- Current phase: Phase 11 — Packaging, Hardening, Acceptance
 - Last successful build: Desktop Build OK (`electron-vite build` 41.88s)
-- Last successful test run: `packages/app` (751 pass), `packages/opencode` (3401 pass)
+- Last successful test run: `packages/app` (754 pass), `packages/opencode` (3404 pass)
 - Current branch: dev
-- Latest phase commit: Phase 09 completed
+- Latest phase commit: Phase 10 completed
 
 ## Phase Status
 - [x] Phase 00 — Repository Audit
@@ -18,11 +18,11 @@
 - [x] Phase 07 — Remote Filesystem + Terminal
 - [x] Phase 08 — Remote OpenCode Agent
 - [x] Phase 09 — Remote LSP + Git
-- [ ] Phase 10 — Debugging / DAP
+- [x] Phase 10 — Debugging / DAP
 - [ ] Phase 11 — Packaging, Hardening, Acceptance
 
 ## Current work
-Starting Phase 10: Implementing Debug Adapter Protocol (DAP) client, breakpoints in Monaco editor, call stack, variables inspector, debug toolbar, and launch configurations.
+Starting Phase 11: End-to-end acceptance testing across macOS/Linux, packaging binaries/desktop distributions, security hardening audit, verifying zero secret leaks, and finalizing documentation.
 
 ## Known issues
 None blocking progress.

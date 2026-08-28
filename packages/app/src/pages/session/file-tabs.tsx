@@ -25,6 +25,7 @@ import { useSessionLayout } from "@/pages/session/session-layout"
 import { createSessionTabs } from "@/pages/session/helpers"
 import { MonacoEditor, SplitEditorContainer } from "@/components/editor"
 import { RemoteConnectionBanner } from "@/components/remote"
+import { DebugToolbar } from "@/components/debug"
 
 type SessionFileViewProps = {
   tab: string
@@ -498,6 +499,7 @@ function SessionFileViewV1(props: { tab: string }) {
   const content = () => (
     <div class="relative h-full min-h-0 flex flex-col">
       <RemoteConnectionBanner />
+      <DebugToolbar />
       <div class="relative flex-1 min-h-0">
         <Switch>
           <Match when={path() && !isBinary()}>
@@ -799,6 +801,7 @@ function SessionFileViewV2(props: { tab: string }) {
   const content = () => (
     <div class="relative h-full min-h-0 flex flex-col">
       <RemoteConnectionBanner />
+      <DebugToolbar />
       <div class="relative flex-1 min-h-0">
         <Switch>
           <Match when={path() && !isBinary()}>

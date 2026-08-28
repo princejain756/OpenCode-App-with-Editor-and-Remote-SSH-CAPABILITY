@@ -85,6 +85,8 @@ import { eventHandlers } from "./handlers/event"
 import { configHandlers } from "./handlers/config"
 import { controlHandlers } from "./handlers/control"
 import { controlPlaneHandlers } from "./handlers/control-plane"
+import { dapHandlers } from "./handlers/dap"
+import { DAPServiceLive } from "@/dap/manager"
 import { experimentalHandlers } from "./handlers/experimental"
 import { fileHandlers } from "./handlers/file"
 import { gitHandlers } from "./handlers/git"
@@ -159,6 +161,7 @@ const ptyConnectApiRoutes = HttpApiBuilder.layer(PtyConnectApi).pipe(
 const instanceApiRoutes = HttpApiBuilder.layer(InstanceHttpApi).pipe(
   Layer.provide([
     configHandlers,
+    dapHandlers,
     experimentalHandlers,
     fileHandlers,
     gitHandlers,
@@ -187,6 +190,7 @@ const instanceRoutes = instanceApiRoutes.pipe(
     schemaErrorLayer,
     SSHServiceLive,
     GitServiceLive,
+    DAPServiceLive,
   ]),
 )
 const serverRoutes = HttpApiBuilder.layer(Api).pipe(
