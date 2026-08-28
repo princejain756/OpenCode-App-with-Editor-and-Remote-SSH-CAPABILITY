@@ -1,11 +1,11 @@
 # Build Status
 
 ## Overall
-- Current phase: Phase 06 — Remote SSH / Remote Explorer
+- Current phase: Phase 07 — Remote Filesystem + Terminal
 - Last successful build: Desktop Build OK (`electron-vite build` 41.88s)
-- Last successful test run: `packages/app` (741 pass), `packages/opencode` (3394 pass)
+- Last successful test run: `packages/app` (744 pass), `packages/opencode` (3396 pass)
 - Current branch: dev
-- Latest phase commit: Phase 05 completed
+- Latest phase commit: Phase 06 completed
 
 ## Phase Status
 - [x] Phase 00 — Repository Audit
@@ -14,7 +14,7 @@
 - [x] Phase 03 — LSP / IntelliSense
 - [x] Phase 04 — Agent + Editor Diff Integration
 - [x] Phase 05 — Rewind / Restore / Fork UX
-- [ ] Phase 06 — Remote SSH / Remote Explorer
+- [x] Phase 06 — Remote SSH / Remote Explorer
 - [ ] Phase 07 — Remote Filesystem + Terminal
 - [ ] Phase 08 — Remote OpenCode Agent
 - [ ] Phase 09 — Remote LSP + Git
@@ -22,7 +22,7 @@
 - [ ] Phase 11 — Packaging, Hardening, Acceptance
 
 ## Current work
-Starting Phase 06: Implementing first-class Remote SSH development, Remote Explorer UI, persistent SSH tunnel manager, credential handling, and remote workspace discovery.
+Starting Phase 07: Implementing remote filesystem tree browsing, remote file read/write, remote PTY terminal execution on Ubuntu, and file streaming.
 
 ## Known issues
 None blocking progress.
