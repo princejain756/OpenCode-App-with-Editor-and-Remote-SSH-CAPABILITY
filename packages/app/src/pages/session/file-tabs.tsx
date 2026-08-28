@@ -23,7 +23,7 @@ import { useSettings } from "@/context/settings"
 import { getSessionHandoff } from "@/pages/session/handoff"
 import { useSessionLayout } from "@/pages/session/session-layout"
 import { createSessionTabs } from "@/pages/session/helpers"
-import { MonacoEditor } from "@/components/editor"
+import { MonacoEditor, SplitEditorContainer } from "@/components/editor"
 
 type SessionFileViewProps = {
   tab: string
@@ -498,7 +498,7 @@ function SessionFileViewV1(props: { tab: string }) {
     <div class="relative h-full min-h-0">
       <Switch>
         <Match when={path() && !isBinary()}>
-          <MonacoEditor path={path()!} />
+          <SplitEditorContainer primaryPath={path()!} />
         </Match>
         <Match when={state()?.loaded}>
           <ScrollView class="h-full" viewportRef={scrollSync.setViewport} onScroll={scrollSync.handleScroll as any}>
@@ -796,7 +796,7 @@ function SessionFileViewV2(props: { tab: string }) {
     <div class="relative h-full min-h-0">
       <Switch>
         <Match when={path() && !isBinary()}>
-          <MonacoEditor path={path()!} />
+          <SplitEditorContainer primaryPath={path()!} />
         </Match>
         <Match when={state()?.loaded}>
           <ScrollView class="h-full" viewportRef={scrollSync.setViewport} onScroll={scrollSync.handleScroll as any}>

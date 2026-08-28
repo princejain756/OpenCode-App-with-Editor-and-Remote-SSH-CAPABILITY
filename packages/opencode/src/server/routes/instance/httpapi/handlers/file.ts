@@ -24,9 +24,32 @@ export const fileHandlers = HttpApiBuilder.group(InstanceHttpApi, "file", (handl
       )
     })
 
-    const findText = Effect.fn("FileHttpApi.findText")(function* (ctx: { query: { pattern: string } }) {
+    const findText = Effect.fn("FileHttpApi.findText")(function* (ctx: {
+      query: {
+        pattern: string
+        limit?: number
+        caseSensitive?: "true" | "false"
+        isRegex?: "true" | "false"
+        matchWholeWord?: "true" | "false"
+        include?: string
+        exclude?: string
+      }
+    }) {
+      const directory = (yield* InstanceState.context).directory
+      const limit = ctx.query.limit ?? 100
+
+      let effectivePattern = ctx.query.pattern
+      if (ctx.query.matchWholeWord === "true" && ctx.query.isRegex !== "true") {
+        effectivePattern = `\\b${effectivePattern.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`
+      }
+
       return (yield* ripgrep
-        .grep({ cwd: (yield* InstanceState.context).directory, pattern: ctx.query.pattern, limit: 10 })
+        .grep({
+          cwd: directory,
+          pattern: effectivePattern,
+          limit,
+          include: ctx.query.include,
+        })
         .pipe(Effect.orDie)).map((match) => ({
         path: { text: match.entry.path },
         lines: { text: match.text },
@@ -203,6 +226,74 @@ export const fileHandlers = HttpApiBuilder.group(InstanceHttpApi, "file", (handl
       }
     })
 
+    const replace = Effect.fn("FileHttpApi.replace")(function* (ctx: {
+      payload: {
+        query: string
+        replace: string
+        files?: readonly string[]
+        caseSensitive?: boolean
+        isRegex?: boolean
+        matchWholeWord?: boolean
+      }
+    }) {
+      const directory = (yield* InstanceState.context).directory
+      const raw = yield* FSUtil.Service
+      const targetFiles: string[] = []
+
+      if (ctx.payload.files && ctx.payload.files.length > 0) {
+        targetFiles.push(...ctx.payload.files)
+      } else {
+        const matches = yield* ripgrep
+          .grep({
+            cwd: directory,
+            pattern: ctx.payload.query,
+            limit: 1000,
+          })
+          .pipe(Effect.orDie)
+        const unique = new Set(matches.map((m) => m.entry.path))
+        targetFiles.push(...unique)
+      }
+
+      const filesModified: string[] = []
+      let matchesReplaced = 0
+
+      let flags = "g"
+      if (!ctx.payload.caseSensitive) flags += "i"
+
+      let regex: RegExp
+      if (ctx.payload.isRegex) {
+        regex = new RegExp(ctx.payload.query, flags)
+      } else if (ctx.payload.matchWholeWord) {
+        const escaped = ctx.payload.query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+        regex = new RegExp(`\\b${escaped}\\b`, flags)
+      } else {
+        const escaped = ctx.payload.query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+        regex = new RegExp(escaped, flags)
+      }
+
+      for (const relPath of targetFiles) {
+        const fullPath = path.resolve(directory, relPath)
+        if (!FSUtil.contains(directory, fullPath)) continue
+        if (!(yield* raw.existsSafe(fullPath))) continue
+
+        const fileContent = yield* raw.readFileString(fullPath).pipe(Effect.catch(() => Effect.succeed(undefined)))
+        if (fileContent === undefined) continue
+
+        const matchCount = (fileContent.match(regex) || []).length
+        if (matchCount > 0) {
+          const replaced = fileContent.replace(regex, ctx.payload.replace)
+          yield* raw.writeWithDirs(fullPath, replaced).pipe(Effect.orDie)
+          filesModified.push(relPath)
+          matchesReplaced += matchCount
+        }
+      }
+
+      return {
+        filesModified,
+        matchesReplaced,
+      }
+    })
+
     return handlers
       .handle("findText", findText)
       .handle("findFile", findFile)
@@ -215,5 +306,6 @@ export const fileHandlers = HttpApiBuilder.group(InstanceHttpApi, "file", (handl
       .handle("delete", remove)
       .handle("rename", rename)
       .handle("stat", stat)
+      .handle("replace", replace)
   }),
 ).pipe(Layer.provide(locationServiceMapLayer))

@@ -20,6 +20,14 @@ export const FileQuery = Schema.Struct({
 export const FindTextQuery = Schema.Struct({
   ...WorkspaceRoutingQueryFields,
   pattern: Schema.String,
+  caseSensitive: Schema.optional(Schema.Literals(["true", "false"])),
+  isRegex: Schema.optional(Schema.Literals(["true", "false"])),
+  matchWholeWord: Schema.optional(Schema.Literals(["true", "false"])),
+  include: Schema.optional(Schema.String),
+  exclude: Schema.optional(Schema.String),
+  limit: Schema.optional(
+    Schema.NumberFromString.check(Schema.isInt(), Schema.isGreaterThanOrEqualTo(1), Schema.isLessThanOrEqualTo(1000)),
+  ),
 })
 
 export const FindFileQuery = Schema.Struct({
@@ -57,6 +65,20 @@ export const RenameFilePayload = Schema.Struct({
   oldPath: Schema.String,
   newPath: Schema.String,
 })
+
+export const ReplaceFilePayload = Schema.Struct({
+  query: Schema.String,
+  replace: Schema.String,
+  files: Schema.optional(Schema.Array(Schema.String)),
+  caseSensitive: Schema.optional(Schema.Boolean),
+  isRegex: Schema.optional(Schema.Boolean),
+  matchWholeWord: Schema.optional(Schema.Boolean),
+})
+
+export const ReplaceResult = Schema.Struct({
+  filesModified: Schema.Array(Schema.String),
+  matchesReplaced: Schema.Number,
+}).annotate({ identifier: "ReplaceResult" })
 
 export const FileStatResult = Schema.Struct({
   exists: Schema.Boolean,
@@ -132,6 +154,7 @@ export const FilePaths = {
   delete: "/file/delete",
   rename: "/file/rename",
   stat: "/file/stat",
+  replace: "/file/replace",
 } as const
 
 export const FileApi = HttpApi.make("file")
@@ -250,6 +273,17 @@ export const FileApi = HttpApi.make("file")
             identifier: "file.stat",
             summary: "Get file stat",
             description: "Get metadata and existence of a specified path.",
+          }),
+        ),
+        HttpApiEndpoint.post("replace", FilePaths.replace, {
+          payload: ReplaceFilePayload,
+          query: WorkspaceRoutingQuery,
+          success: described(ReplaceResult, "Replace operation result"),
+        }).annotateMerge(
+          OpenApi.annotations({
+            identifier: "file.replace",
+            summary: "Replace in files",
+            description: "Search and replace text across files in the workspace.",
           }),
         ),
       )

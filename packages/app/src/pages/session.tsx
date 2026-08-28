@@ -26,6 +26,7 @@ import { debounce } from "@solid-primitives/scheduled"
 import { useLocal } from "@/context/local"
 import { FileProvider, selectionFromLines, useFile, type FileSelection, type SelectedLineRange } from "@/context/file"
 import { BufferProvider } from "@/context/buffer"
+import { SplitEditorProvider } from "@/context/split-editor"
 import { createStore } from "solid-js/store"
 import type { SessionReviewLineComment } from "@opencode-ai/session-ui/session-review"
 import { ResizeHandle } from "@opencode-ai/ui/resize-handle"
@@ -320,9 +321,11 @@ function SessionProviders(props: ParentProps) {
     <TerminalProvider>
       <FileProvider>
         <BufferProvider>
-          <PromptProvider>
-            <CommentsProvider>{props.children}</CommentsProvider>
-          </PromptProvider>
+          <SplitEditorProvider>
+            <PromptProvider>
+              <CommentsProvider>{props.children}</CommentsProvider>
+            </PromptProvider>
+          </SplitEditorProvider>
         </BufferProvider>
       </FileProvider>
     </TerminalProvider>
