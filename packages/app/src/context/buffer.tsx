@@ -499,7 +499,9 @@ export const { use: useBuffer, provider: BufferProvider } = createSimpleContext(
       setSettings,
       activeTab,
       activePath,
-      activeBuffer,
+      dirtyBuffers: () => Object.values(buffers).filter((b) => b.isDirty),
+      dirtyFiles: () => Object.keys(buffers).filter((k) => buffers[k]?.isDirty),
+      openFiles: () => Object.keys(buffers),
       getBuffer: (filePath: string) => {
         const norm = path.normalize(filePath)
         return norm ? buffers[norm] : undefined
