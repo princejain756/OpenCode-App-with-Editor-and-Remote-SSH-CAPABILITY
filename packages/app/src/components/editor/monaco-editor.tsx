@@ -9,6 +9,7 @@ import { EditorStatusBar } from "./editor-status-bar"
 import { EditorSettingsDialog } from "./editor-settings-dialog"
 import { DiffViewerDialog } from "./diff-viewer-dialog"
 import { registerMonacoLspProviders, syncModelDiagnostics, ProblemsPanel } from "@/components/lsp"
+import { AgentReviewBanner } from "@/components/agent-review"
 
 export interface MonacoEditorProps {
   path: string
@@ -160,6 +161,11 @@ export function MonacoEditor(props: MonacoEditorProps) {
           onCompare={() => setShowDiff(true)}
         />
       </Show>
+
+      <AgentReviewBanner
+        path={props.path}
+        onCompareDiff={() => setShowDiff(true)}
+      />
 
       <div class="flex-1 w-full min-h-0 relative">
         <div ref={containerRef} class="absolute inset-0" />

@@ -28,6 +28,7 @@ import { FileProvider, selectionFromLines, useFile, type FileSelection, type Sel
 import { BufferProvider } from "@/context/buffer"
 import { SplitEditorProvider } from "@/context/split-editor"
 import { LspProvider } from "@/context/lsp"
+import { AgentReviewProvider } from "@/context/agent-review"
 import { createStore } from "solid-js/store"
 import type { SessionReviewLineComment } from "@opencode-ai/session-ui/session-review"
 import { ResizeHandle } from "@opencode-ai/ui/resize-handle"
@@ -324,9 +325,11 @@ function SessionProviders(props: ParentProps) {
         <BufferProvider>
           <SplitEditorProvider>
             <LspProvider>
-              <PromptProvider>
-                <CommentsProvider>{props.children}</CommentsProvider>
-              </PromptProvider>
+              <AgentReviewProvider>
+                <PromptProvider>
+                  <CommentsProvider>{props.children}</CommentsProvider>
+                </PromptProvider>
+              </AgentReviewProvider>
             </LspProvider>
           </SplitEditorProvider>
         </BufferProvider>
