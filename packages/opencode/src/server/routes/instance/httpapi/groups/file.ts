@@ -37,6 +37,34 @@ export const FindSymbolQuery = Schema.Struct({
   query: Schema.String,
 })
 
+export const WriteFilePayload = Schema.Struct({
+  path: Schema.String,
+  content: Schema.String,
+})
+
+export const CreateFilePayload = Schema.Struct({
+  path: Schema.String,
+  type: Schema.Literals(["file", "directory"]),
+  content: Schema.optional(Schema.String),
+})
+
+export const DeleteFilePayload = Schema.Struct({
+  path: Schema.String,
+  recursive: Schema.optional(Schema.Boolean),
+})
+
+export const RenameFilePayload = Schema.Struct({
+  oldPath: Schema.String,
+  newPath: Schema.String,
+})
+
+export const FileStatResult = Schema.Struct({
+  exists: Schema.Boolean,
+  type: Schema.optional(Schema.Literals(["file", "directory", "symlink", "other"])),
+  size: Schema.optional(Schema.Number),
+  mtime: Schema.optional(Schema.Number),
+}).annotate({ identifier: "FileStatResult" })
+
 export const LegacyMatch = Schema.Struct({
   path: Schema.Struct({ text: Schema.String }),
   lines: Schema.Struct({ text: Schema.String }),
@@ -99,6 +127,11 @@ export const FilePaths = {
   list: "/file",
   content: "/file/content",
   status: "/file/status",
+  write: "/file/write",
+  create: "/file/create",
+  delete: "/file/delete",
+  rename: "/file/rename",
+  stat: "/file/stat",
 } as const
 
 export const FileApi = HttpApi.make("file")
@@ -163,6 +196,60 @@ export const FileApi = HttpApi.make("file")
             identifier: "file.status",
             summary: "Get file status",
             description: "Get the git status of all files in the project.",
+          }),
+        ),
+        HttpApiEndpoint.post("write", FilePaths.write, {
+          payload: WriteFilePayload,
+          query: WorkspaceRoutingQuery,
+          success: described(Schema.Boolean, "Write success"),
+        }).annotateMerge(
+          OpenApi.annotations({
+            identifier: "file.write",
+            summary: "Write file",
+            description: "Write content to a specified file.",
+          }),
+        ),
+        HttpApiEndpoint.post("create", FilePaths.create, {
+          payload: CreateFilePayload,
+          query: WorkspaceRoutingQuery,
+          success: described(Schema.Boolean, "Create success"),
+        }).annotateMerge(
+          OpenApi.annotations({
+            identifier: "file.create",
+            summary: "Create file or directory",
+            description: "Create a new file or directory at the specified path.",
+          }),
+        ),
+        HttpApiEndpoint.post("delete", FilePaths.delete, {
+          payload: DeleteFilePayload,
+          query: WorkspaceRoutingQuery,
+          success: described(Schema.Boolean, "Delete success"),
+        }).annotateMerge(
+          OpenApi.annotations({
+            identifier: "file.delete",
+            summary: "Delete file or directory",
+            description: "Delete a file or directory at the specified path.",
+          }),
+        ),
+        HttpApiEndpoint.post("rename", FilePaths.rename, {
+          payload: RenameFilePayload,
+          query: WorkspaceRoutingQuery,
+          success: described(Schema.Boolean, "Rename success"),
+        }).annotateMerge(
+          OpenApi.annotations({
+            identifier: "file.rename",
+            summary: "Rename file or directory",
+            description: "Rename or move a file or directory to a new path.",
+          }),
+        ),
+        HttpApiEndpoint.get("stat", FilePaths.stat, {
+          query: FileQuery,
+          success: described(FileStatResult, "File stat information"),
+        }).annotateMerge(
+          OpenApi.annotations({
+            identifier: "file.stat",
+            summary: "Get file stat",
+            description: "Get metadata and existence of a specified path.",
           }),
         ),
       )

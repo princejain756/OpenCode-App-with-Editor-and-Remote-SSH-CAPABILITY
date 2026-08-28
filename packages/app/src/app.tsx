@@ -41,6 +41,7 @@ import { makeEventListener } from "@solid-primitives/event-listener"
 import { CommandProvider, useCommand, type CommandOption } from "@/context/command"
 import { CommentsProvider } from "@/context/comments"
 import { FileProvider } from "@/context/file"
+import { BufferProvider } from "@/context/buffer"
 import { ServerSDKProvider } from "@/context/server-sdk"
 import { ServerSyncProvider, useServerSync } from "@/context/server-sync"
 import { GlobalProvider, useGlobal } from "@/context/global"
@@ -383,9 +384,11 @@ function NewAppLayout(props: ParentProps<{ serverScoped?: JSX.Element }>) {
 function DraftProviders(props: ParentProps) {
   return (
     <FileProvider>
-      <PromptProvider>
-        <CommentsProvider>{props.children}</CommentsProvider>
-      </PromptProvider>
+      <BufferProvider>
+        <PromptProvider>
+          <CommentsProvider>{props.children}</CommentsProvider>
+        </PromptProvider>
+      </BufferProvider>
     </FileProvider>
   )
 }

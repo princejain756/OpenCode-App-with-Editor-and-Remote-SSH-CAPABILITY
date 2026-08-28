@@ -113,7 +113,7 @@ export const fileHandlers = HttpApiBuilder.group(InstanceHttpApi, "file", (handl
         ),
         Effect.map(({ item, text }) =>
           Option.isSome(text)
-            ? { type: "text" as const, content: text.value.trim() }
+            ? { type: "text" as const, content: text.value }
             : {
                 type: "binary" as const,
                 content: Buffer.from(item.content).toString("base64"),
@@ -128,6 +128,81 @@ export const fileHandlers = HttpApiBuilder.group(InstanceHttpApi, "file", (handl
       return []
     })
 
+    const write = Effect.fn("FileHttpApi.write")(function* (ctx: { payload: { path: string; content: string } }) {
+      const directory = (yield* InstanceState.context).directory
+      const file = path.resolve(directory, ctx.payload.path)
+      if (!FSUtil.contains(directory, file)) return yield* Effect.die(new Error("Path escapes the location"))
+      const raw = yield* FSUtil.Service
+      yield* raw.writeWithDirs(file, ctx.payload.content).pipe(Effect.orDie)
+      return true
+    })
+
+    const create = Effect.fn("FileHttpApi.create")(function* (ctx: {
+      payload: { path: string; type: "file" | "directory"; content?: string }
+    }) {
+      const directory = (yield* InstanceState.context).directory
+      const target = path.resolve(directory, ctx.payload.path)
+      if (!FSUtil.contains(directory, target)) return yield* Effect.die(new Error("Path escapes the location"))
+      const raw = yield* FSUtil.Service
+      if (ctx.payload.type === "directory") {
+        yield* raw.ensureDir(target).pipe(Effect.orDie)
+      } else {
+        yield* raw.writeWithDirs(target, ctx.payload.content ?? "").pipe(Effect.orDie)
+      }
+      return true
+    })
+
+    const remove = Effect.fn("FileHttpApi.delete")(function* (ctx: {
+      payload: { path: string; recursive?: boolean }
+    }) {
+      const directory = (yield* InstanceState.context).directory
+      const target = path.resolve(directory, ctx.payload.path)
+      if (!FSUtil.contains(directory, target)) return yield* Effect.die(new Error("Path escapes the location"))
+      if (target === directory) return yield* Effect.die(new Error("Cannot delete workspace root"))
+      const raw = yield* FSUtil.Service
+      yield* raw.remove(target, { recursive: ctx.payload.recursive ?? true }).pipe(Effect.orDie)
+      return true
+    })
+
+    const rename = Effect.fn("FileHttpApi.rename")(function* (ctx: {
+      payload: { oldPath: string; newPath: string }
+    }) {
+      const directory = (yield* InstanceState.context).directory
+      const src = path.resolve(directory, ctx.payload.oldPath)
+      const dst = path.resolve(directory, ctx.payload.newPath)
+      if (!FSUtil.contains(directory, src) || !FSUtil.contains(directory, dst))
+        return yield* Effect.die(new Error("Path escapes the location"))
+      const raw = yield* FSUtil.Service
+      yield* raw.ensureDir(path.dirname(dst)).pipe(Effect.orDie)
+      yield* raw.rename(src, dst).pipe(Effect.orDie)
+      return true
+    })
+
+    const stat = Effect.fn("FileHttpApi.stat")(function* (ctx: { query: { path: string } }) {
+      const directory = (yield* InstanceState.context).directory
+      const target = path.resolve(directory, ctx.query.path)
+      if (!FSUtil.contains(directory, target)) return yield* Effect.die(new Error("Path escapes the location"))
+      const raw = yield* FSUtil.Service
+      const exists = yield* raw.existsSafe(target)
+      if (!exists) return { exists: false }
+      const info = yield* raw.stat(target).pipe(Effect.catch(() => Effect.succeed(undefined)))
+      if (!info) return { exists: true }
+      const type =
+        info.type === "Directory"
+          ? ("directory" as const)
+          : info.type === "File"
+            ? ("file" as const)
+            : info.type === "SymbolicLink"
+              ? ("symlink" as const)
+              : ("other" as const)
+      return {
+        exists: true,
+        type,
+        size: Number(info.size),
+        mtime: Option.isSome(info.mtime) ? info.mtime.value.getTime() : undefined,
+      }
+    })
+
     return handlers
       .handle("findText", findText)
       .handle("findFile", findFile)
@@ -135,5 +210,10 @@ export const fileHandlers = HttpApiBuilder.group(InstanceHttpApi, "file", (handl
       .handle("list", list)
       .handle("content", content)
       .handle("status", status)
+      .handle("write", write)
+      .handle("create", create)
+      .handle("delete", remove)
+      .handle("rename", rename)
+      .handle("stat", stat)
   }),
 ).pipe(Layer.provide(locationServiceMapLayer))
