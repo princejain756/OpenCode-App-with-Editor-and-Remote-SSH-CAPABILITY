@@ -99,6 +99,22 @@ export const sshHandlers = HttpApiBuilder.group(InstanceHttpApi, "ssh", (handler
       return yield* Effect.promise(() => manager.disconnect(ctx.payload.hostId))
     })
 
+    const bootstrap = Effect.fn("SshHttpApi.bootstrap")(function* (ctx: {
+      payload: { hostId: string; workspaceDir?: string }
+    }) {
+      return yield* Effect.promise(() =>
+        manager.bootstrapRemoteServer(ctx.payload.hostId, ctx.payload.workspaceDir),
+      )
+    })
+
+    const exec = Effect.fn("SshHttpApi.exec")(function* (ctx: {
+      payload: { hostId: string; command: string }
+    }) {
+      return yield* Effect.promise(() =>
+        manager.execRemoteCommand(ctx.payload.hostId, ctx.payload.command),
+      )
+    })
+
     const status = Effect.fn("SshHttpApi.status")(function* () {
       return manager.getStatus()
     })
@@ -109,6 +125,8 @@ export const sshHandlers = HttpApiBuilder.group(InstanceHttpApi, "ssh", (handler
       .handle("removeHost", removeHost)
       .handle("connect", connect)
       .handle("disconnect", disconnect)
+      .handle("bootstrap", bootstrap)
+      .handle("exec", exec)
       .handle("status", status)
   }),
 )
