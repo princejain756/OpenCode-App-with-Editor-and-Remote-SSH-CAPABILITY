@@ -10,7 +10,12 @@ import { useFile } from "@/context/file"
 import { useLanguage } from "@/context/language"
 import { useCommand } from "@/context/command"
 
+import { useBuffer } from "@/context/buffer"
+
 export function FileVisual(props: { path: string; active?: boolean; temporary?: boolean }): JSX.Element {
+  const buffer = useBuffer()
+  const isDirty = () => buffer.getBuffer(props.path)?.isDirty ?? false
+
   return (
     <div class="flex items-center gap-x-1.5 min-w-0">
       <Show
@@ -25,6 +30,9 @@ export function FileVisual(props: { path: string; active?: boolean; temporary?: 
       <span class="text-14-medium truncate" classList={{ italic: props.temporary }}>
         {getFilename(props.path)}
       </span>
+      <Show when={isDirty()}>
+        <span class="inline-block size-2 rounded-full bg-blue-500 shrink-0" title="Unsaved changes" />
+      </Show>
     </div>
   )
 }

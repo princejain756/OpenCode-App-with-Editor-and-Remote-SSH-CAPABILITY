@@ -1,15 +1,15 @@
 # Build Status
 
 ## Overall
-- Current phase: Phase 01 — Editable Local Editor
-- Last successful build: Desktop Build OK (`electron-vite build` 19.10s)
-- Last successful test run: `packages/app` (723 pass), `packages/opencode` (3394 pass)
+- Current phase: Phase 02 — Buffers, Tabs, Search, Watchers
+- Last successful build: Desktop Build OK (`electron-vite build` 41.88s)
+- Last successful test run: `packages/app` (727 pass), `packages/opencode` (3394 pass)
 - Current branch: dev
-- Latest phase commit: Phase 00 completed
+- Latest phase commit: Phase 01 completed
 
 ## Phase Status
 - [x] Phase 00 — Repository Audit
-- [ ] Phase 01 — Editable Local Editor
+- [x] Phase 01 — Editable Local Editor
 - [ ] Phase 02 — Buffers, Tabs, Search, Watchers
 - [ ] Phase 03 — LSP / IntelliSense
 - [ ] Phase 04 — Agent + Editor Diff Integration
@@ -22,7 +22,7 @@
 - [ ] Phase 11 — Packaging, Hardening, Acceptance
 
 ## Current work
-Starting Phase 01: Implementing the Editable Local Editor with Monaco Editor integration, tab manager, dirty tracking, save/save-as, and file creation/renaming/deletion operations.
+Starting Phase 02: Enhancing multi-tab lifecycle, split editor panes, global full-text search (ripgrep) with find-and-replace, and resilient workspace file watchers.
 
 ## Known issues
 None blocking progress.

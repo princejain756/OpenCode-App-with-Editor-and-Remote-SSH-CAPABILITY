@@ -87,6 +87,7 @@
     "luxon": "catalog:",
     "marked": "catalog:",
     "marked-shiki": "catalog:",
+    "monaco-editor": "0.56.0",
     "remeda": "catalog:",
     "shiki": "catalog:",
     "solid-js": "catalog:",
