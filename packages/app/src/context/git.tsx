@@ -378,6 +378,7 @@ export const { use: useGit, provider: GitProvider } = createSimpleContext({
       branches,
       isLoading,
       isOperating,
+      currentBranch: () => status.branch,
       fetchStatus,
       fetchBranches,
       stage,

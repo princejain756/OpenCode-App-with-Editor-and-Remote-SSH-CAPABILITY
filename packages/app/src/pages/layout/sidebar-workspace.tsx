@@ -155,6 +155,7 @@ const WorkspaceActions = (props: {
   root: string
   clearHoverProjectSoon: WorkspaceSidebarContext["clearHoverProjectSoon"]
   navigateToNewSession: () => void
+  navigateToIDE: () => void
 }): JSX.Element => (
   <div
     class="absolute right-1 top-1/2 -translate-y-1/2 flex items-center gap-0.5 transition-opacity"
@@ -215,6 +216,23 @@ const WorkspaceActions = (props: {
       </DropdownMenu.Portal>
     </DropdownMenu>
     <Show when={!props.touch()}>
+      <Tooltip value="Open in IDE" placement="top">
+        <IconButtonV2
+          icon={<IconV2 name="file-tree" size="small" />}
+          variant="ghost"
+          size="small"
+          class="size-6 rounded-md opacity-0 pointer-events-none group-hover/workspace:opacity-100 group-hover/workspace:pointer-events-auto group-focus-within/workspace:opacity-100 group-focus-within/workspace:pointer-events-auto"
+          data-action="workspace-open-ide"
+          data-workspace={base64Encode(props.directory)}
+          aria-label="Open in IDE"
+          onClick={(event) => {
+            event.preventDefault()
+            event.stopPropagation()
+            props.clearHoverProjectSoon()
+            props.navigateToIDE()
+          }}
+        />
+      </Tooltip>
       <Tooltip value={props.language.t("command.session.new")} placement="top">
         <IconButtonV2
           icon={<IconV2 name="edit" size="small" />}
@@ -420,6 +438,7 @@ export const SortableWorkspace = (props: {
                 root={props.project.worktree}
                 clearHoverProjectSoon={props.ctx.clearHoverProjectSoon}
                 navigateToNewSession={() => navigate(`/${slug()}/session`)}
+                navigateToIDE={() => navigate(`/${slug()}/ide`)}
               />
             </div>
           </div>
