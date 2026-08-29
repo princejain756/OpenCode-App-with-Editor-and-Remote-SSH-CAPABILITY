@@ -31,44 +31,23 @@
  * FileProvider). The route component is responsible for that.
  */
 
-import {
-  batch,
-  createEffect,
-  createMemo,
-  createSignal,
-  For,
-  onCleanup,
-  onMount,
-  Show,
-  type JSX,
-  type ParentProps,
-} from "solid-js"
-import { Dynamic } from "solid-js/web"
-import { Portal } from "solid-js/web"
-import { useNavigate, useParams } from "@solidjs/router"
+import { createMemo, createSignal, For, onMount, Show } from "solid-js"
+import { useNavigate } from "@solidjs/router"
 import { getFilename } from "@opencode-ai/core/util/path"
 import { base64Encode } from "@opencode-ai/core/util/encode"
 import { Button } from "@opencode-ai/ui/button"
 import { Icon } from "@opencode-ai/ui/icon"
 import { IconButton } from "@opencode-ai/ui/icon-button"
-import { Spinner } from "@opencode-ai/ui/spinner"
-import { Tabs } from "@opencode-ai/ui/tabs"
 import { Tooltip } from "@opencode-ai/ui/tooltip"
 
 import { useBuffer } from "@/context/buffer"
 import { useFile } from "@/context/file"
-import { useSDK } from "@/context/sdk"
-import { useServerSDK } from "@/context/server-sdk"
-import { useLanguage } from "@/context/language"
 import { useLsp } from "@/context/lsp"
 import { useGit } from "@/context/git"
-import { useDAP } from "@/context/dap"
 import { useSSH } from "@/context/ssh"
 import { useAgentReview } from "@/context/agent-review"
-import { useTimelineSync } from "@/context/timeline-sync"
 import { useTerminal } from "@/context/terminal"
 import { usePlatform } from "@/context/platform"
-import { useGlobal } from "@/context/global"
 
 import FileTreeV2 from "@/components/file-tree-v2"
 import type { FileNode } from "@opencode-ai/sdk/v2"
@@ -99,21 +78,14 @@ export interface IDEWorkbenchProps {
 
 export function IDEWorkbench(props: IDEWorkbenchProps) {
   const navigate = useNavigate()
-  const params = useParams()
   const buffer = useBuffer()
   const file = useFile()
-  const sdk = useSDK()
-  const serverSDK = useServerSDK()
-  const language = useLanguage()
   const platform = usePlatform()
   const ssh = useSSH()
   const lsp = useLsp()
   const git = useGit()
-  const dap = useDAP()
   const agentReview = useAgentReview()
-  const timelineSync = useTimelineSync()
   const terminal = useTerminal()
-  const global = useGlobal()
 
   const [activityTab, setActivityTab] = createSignal<ActivityTab>("explorer")
   const [sidebarOpen, setSidebarOpen] = createSignal(true)
