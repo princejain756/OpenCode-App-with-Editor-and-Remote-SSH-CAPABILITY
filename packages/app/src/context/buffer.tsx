@@ -58,10 +58,12 @@ export const { use: useBuffer, provider: BufferProvider } = createSimpleContext(
     const inflightLoads = new Map<string, Promise<EditorBuffer | undefined>>()
 
     const setSettings = (update: Partial<EditorSettings> | ((prev: EditorSettings) => Partial<EditorSettings>)) => {
-      setSettingsStore(produce((draft) => {
-        const next = typeof update === "function" ? update(draft as EditorSettings) : update
-        Object.assign(draft, next)
-      }))
+      setSettingsStore(
+        produce((draft) => {
+          const next = typeof update === "function" ? update(draft as EditorSettings) : update
+          Object.assign(draft, next)
+        }),
+      )
       saveEditorSettings(settings)
     }
 
@@ -132,31 +134,37 @@ export const { use: useBuffer, provider: BufferProvider } = createSimpleContext(
           const data = resp.data
           const textContent = typeof data?.content === "string" ? data.content : ""
 
-          setBuffers(norm, produce((draft) => {
-            draft.isLoading = false
-            draft.diskVersion += 1
-            draft.lastModified = Date.now()
+          setBuffers(
+            norm,
+            produce((draft) => {
+              draft.isLoading = false
+              draft.diskVersion += 1
+              draft.lastModified = Date.now()
 
-            if (draft.isDirty && draft.content !== textContent) {
-              draft.hasConflict = true
-              draft.conflictContent = textContent
-            } else {
-              draft.content = textContent
-              draft.diskContent = textContent
-              draft.isDirty = false
-              draft.hasConflict = false
-              draft.conflictContent = undefined
-            }
-          }))
+              if (draft.isDirty && draft.content !== textContent) {
+                draft.hasConflict = true
+                draft.conflictContent = textContent
+              } else {
+                draft.content = textContent
+                draft.diskContent = textContent
+                draft.isDirty = false
+                draft.hasConflict = false
+                draft.conflictContent = undefined
+              }
+            }),
+          )
 
           return buffers[norm]
         } catch (err) {
           if (scope() !== dir) return undefined
           const errMsg = err instanceof Error ? err.message : String(err)
-          setBuffers(norm, produce((draft) => {
-            draft.isLoading = false
-            draft.error = errMsg
-          }))
+          setBuffers(
+            norm,
+            produce((draft) => {
+              draft.isLoading = false
+              draft.error = errMsg
+            }),
+          )
           return undefined
         } finally {
           inflightLoads.delete(cacheKey)
@@ -176,17 +184,29 @@ export const { use: useBuffer, provider: BufferProvider } = createSimpleContext(
       await loadBuffer(norm)
     }
 
+    const close = (inputPath: string) => {
+      const norm = path.normalize(inputPath)
+      if (!norm) return
+      const tabKey = path.tab(norm)
+      tabs.close(tabKey)
+      // Clear the in-memory buffer so the entry doesn't show in dirtyFiles / openFiles
+      setBuffers(norm, undefined as any)
+    }
+
     const updateContent = (inputPath: string, newContent: string) => {
       const norm = path.normalize(inputPath)
       if (!norm) return
       ensureBuffer(norm)
 
-      setBuffers(norm, produce((draft) => {
-        if (draft.content === newContent) return
-        draft.content = newContent
-        draft.bufferVersion += 1
-        draft.isDirty = draft.content !== draft.diskContent
-      }))
+      setBuffers(
+        norm,
+        produce((draft) => {
+          if (draft.content === newContent) return
+          draft.content = newContent
+          draft.bufferVersion += 1
+          draft.isDirty = draft.content !== draft.diskContent
+        }),
+      )
     }
 
     const save = async (inputPath: string): Promise<boolean> => {
@@ -213,15 +233,18 @@ export const { use: useBuffer, provider: BufferProvider } = createSimpleContext(
           if (!response.ok) throw new Error(`Write failed with status ${response.status}`)
         }
 
-        setBuffers(norm, produce((draft) => {
-          draft.isSaving = false
-          draft.diskContent = contentToWrite
-          draft.diskVersion += 1
-          draft.isDirty = false
-          draft.hasConflict = false
-          draft.conflictContent = undefined
-          draft.lastModified = Date.now()
-        }))
+        setBuffers(
+          norm,
+          produce((draft) => {
+            draft.isSaving = false
+            draft.diskContent = contentToWrite
+            draft.diskVersion += 1
+            draft.isDirty = false
+            draft.hasConflict = false
+            draft.conflictContent = undefined
+            draft.lastModified = Date.now()
+          }),
+        )
 
         showToast({
           variant: "success",
@@ -231,10 +254,13 @@ export const { use: useBuffer, provider: BufferProvider } = createSimpleContext(
         return true
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err)
-        setBuffers(norm, produce((draft) => {
-          draft.isSaving = false
-          draft.error = message
-        }))
+        setBuffers(
+          norm,
+          produce((draft) => {
+            draft.isSaving = false
+            draft.error = message
+          }),
+        )
         showToast({
           variant: "error",
           title: language.t("common.requestFailed"),
@@ -257,12 +283,15 @@ export const { use: useBuffer, provider: BufferProvider } = createSimpleContext(
       const buf = buffers[norm]
       if (!buf) return
 
-      setBuffers(norm, produce((draft) => {
-        draft.content = draft.diskContent
-        draft.isDirty = false
-        draft.hasConflict = false
-        draft.conflictContent = undefined
-      }))
+      setBuffers(
+        norm,
+        produce((draft) => {
+          draft.content = draft.diskContent
+          draft.isDirty = false
+          draft.hasConflict = false
+          draft.conflictContent = undefined
+        }),
+      )
     }
 
     const resolveConflict = (inputPath: string, resolution: ConflictResolution) => {
@@ -272,38 +301,50 @@ export const { use: useBuffer, provider: BufferProvider } = createSimpleContext(
       if (!buf) return
 
       if (resolution === "reload") {
-        setBuffers(norm, produce((draft) => {
-          if (draft.conflictContent !== undefined) {
-            draft.content = draft.conflictContent
-            draft.diskContent = draft.conflictContent
-          }
-          draft.isDirty = false
-          draft.hasConflict = false
-          draft.conflictContent = undefined
-        }))
+        setBuffers(
+          norm,
+          produce((draft) => {
+            if (draft.conflictContent !== undefined) {
+              draft.content = draft.conflictContent
+              draft.diskContent = draft.conflictContent
+            }
+            draft.isDirty = false
+            draft.hasConflict = false
+            draft.conflictContent = undefined
+          }),
+        )
       } else if (resolution === "keep") {
-        setBuffers(norm, produce((draft) => {
-          draft.hasConflict = false
-          draft.conflictContent = undefined
-        }))
+        setBuffers(
+          norm,
+          produce((draft) => {
+            draft.hasConflict = false
+            draft.conflictContent = undefined
+          }),
+        )
       }
     }
 
     const updateCursor = (inputPath: string, line: number, column: number) => {
       const norm = path.normalize(inputPath)
       if (!norm) return
-      setBuffers(norm, produce((draft) => {
-        draft.cursor = { line, column }
-      }))
+      setBuffers(
+        norm,
+        produce((draft) => {
+          draft.cursor = { line, column }
+        }),
+      )
     }
 
     const updateScroll = (inputPath: string, scrollTop: number, scrollLeft: number) => {
       const norm = path.normalize(inputPath)
       if (!norm) return
-      setBuffers(norm, produce((draft) => {
-        draft.scrollTop = scrollTop
-        draft.scrollLeft = scrollLeft
-      }))
+      setBuffers(
+        norm,
+        produce((draft) => {
+          draft.scrollTop = scrollTop
+          draft.scrollLeft = scrollLeft
+        }),
+      )
     }
 
     const createFile = async (filePath: string, initialContent = ""): Promise<boolean> => {
@@ -462,23 +503,26 @@ export const { use: useBuffer, provider: BufferProvider } = createSimpleContext(
         .client.file.read({ path: norm })
         .then((resp) => {
           const diskText = typeof resp.data?.content === "string" ? resp.data.content : ""
-          setBuffers(norm, produce((draft) => {
-            draft.diskVersion += 1
-            draft.lastModified = Date.now()
+          setBuffers(
+            norm,
+            produce((draft) => {
+              draft.diskVersion += 1
+              draft.lastModified = Date.now()
 
-            if (draft.isDirty) {
-              if (draft.content !== diskText) {
-                draft.hasConflict = true
-                draft.conflictContent = diskText
+              if (draft.isDirty) {
+                if (draft.content !== diskText) {
+                  draft.hasConflict = true
+                  draft.conflictContent = diskText
+                }
+              } else {
+                draft.content = diskText
+                draft.diskContent = diskText
+                draft.isDirty = false
+                draft.hasConflict = false
+                draft.conflictContent = undefined
               }
-            } else {
-              draft.content = diskText
-              draft.diskContent = diskText
-              draft.isDirty = false
-              draft.hasConflict = false
-              draft.conflictContent = undefined
-            }
-          }))
+            }),
+          )
         })
         .catch(() => {})
     }
@@ -509,6 +553,7 @@ export const { use: useBuffer, provider: BufferProvider } = createSimpleContext(
       ensureBuffer,
       loadBuffer,
       open,
+      close,
       updateContent,
       save,
       saveAll,
